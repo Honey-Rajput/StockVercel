@@ -1,0 +1,32 @@
+# Data
+yfinance>=0.2.31
+openpyxl>=3.1.2
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Technical Analysis
+ta>=0.11.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+joblib>=1.3.0
+
+# Dashboard
+streamlit>=1.28.0
+plotly>=5.18.0
+
+# Scheduler
+APScheduler>=3.10.4
+
+# Alerts
+python-telegram-bot>=20.7
+pywhatkit>=5.4
+requests>=2.31.0
+
+# Database (Neon DB)
+psycopg2-binary>=2.9.9
+
+# Utilities
+python-dateutil>=2.8.2
+pytz>=2023.3

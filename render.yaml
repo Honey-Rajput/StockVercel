@@ -1,3 +1,4 @@
+services:
   - type: web
     name: stock-advisor-all-in-one
     env: python

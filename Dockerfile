@@ -1,7 +1,7 @@
 # Python Backend Dockerfile
-# For running the ML analysis pipeline on a schedule
+# For running the Dashboard, Bot, and Scheduler
 
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
@@ -14,12 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
-COPY *.py ./
-COPY stocks.xlsx ./
+# Copy source code and config
+COPY . .
+
+# Ensure start script is executable
+RUN chmod +x start.sh
 
 # Create output directories
 RUN mkdir -p output/history models
 
-# Default: run scheduler
-CMD ["python", "scheduler.py"]
+# Default to the all-in-one start script
+CMD ["./start.sh"]

@@ -593,70 +593,43 @@ with tab3:
 
 
 # ============================================================
-# TAB 4: PORTFOLIO ALLOCATION
+# TAB 4: AI PREDICTOR
 # ============================================================
 with tab4:
-    st.markdown("### 💰 Portfolio Allocator")
+    st.markdown("### 🔮 AI Stock Predictor")
+    
+    col_sym, col_tf = st.columns([2, 1])
+    with col_sym:
+        pred_symbol = st.text_input("Enter Stock Symbol", "RELIANCE", key="st_pred_sym").upper()
+    with col_tf:
+        pred_timeframe = st.selectbox("Timeframe", 
+                                      ["5 min", "15 min", "1 hour", "4 hours", "1 day", "1 week", "1 month"],
+                                      index=4, key="st_pred_tf")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        capital = st.number_input("Total Capital (₹)", value=500000, step=50000)
-    with col2:
-        risk = st.selectbox("Risk Profile", ["conservative", "moderate", "aggressive"], index=1)
-
-    tf_for_alloc = st.selectbox("Use Recommendations From", ["long_term", "short_term", "intraday"], index=0)
-
-    if st.button("📊 Generate Allocation", type="primary", use_container_width=True):
-        results, _ = load_latest_results()
-        if not results or tf_for_alloc not in results or results[tf_for_alloc].empty:
-            st.error("No recommendations available. Run the analysis first!")
+    if st.button("✨ Generate AI Prediction", type="primary", use_container_width=True):
+        if not pred_symbol:
+            st.warning("Please enter a symbol.")
         else:
-            from portfolio_allocator import allocate_portfolio, portfolio_summary
-
-            alloc = allocate_portfolio(results[tf_for_alloc], capital, risk)
-            summary = portfolio_summary(alloc, capital)
-
-            if "error" in summary:
-                st.warning("No Buy signals found. Try a different timeframe or run analysis again.")
-            else:
-                # Summary metrics
-                m1, m2, m3, m4 = st.columns(4)
-                with m1:
-                    st.metric("Invested", f"₹{summary['invested']:,.0f}")
-                with m2:
-                    st.metric("Cash Reserve", f"₹{summary['cash_reserve']:,.0f}",
-                              f"{summary['cash_reserve_pct']:.1f}%")
-                with m3:
-                    st.metric("Stocks", summary["num_stocks"])
-                with m4:
-                    st.metric("Total Risk", f"₹{summary['total_risk']:,.0f}",
-                              f"{summary['risk_pct']:.1f}%")
-
-                st.markdown("")
-
-                # Allocation table
-                st.markdown("### 📋 Allocation Details")
-                st.dataframe(alloc, use_container_width=True)
-
-                # Sector pie chart
-                if summary["sector_breakdown"]:
-                    fig = go.Figure(data=[go.Pie(
-                        labels=list(summary["sector_breakdown"].keys()),
-                        values=list(summary["sector_breakdown"].values()),
-                        hole=0.5,
-                        marker=dict(colors=px.colors.qualitative.Set3),
-                        textinfo="label+percent",
-                        textfont_size=12,
-                    )])
-                    fig.update_layout(
-                        template="plotly_dark",
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        plot_bgcolor="rgba(0,0,0,0)",
-                        height=350,
-                        title="Sector Allocation",
-                        showlegend=False,
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+            with st.spinner(f"AI is analyzing {pred_symbol}..."):
+                try:
+                    from telegram_bot import get_ai_prediction
+                    # get_ai_prediction is async, so we need to run it in a loop
+                    import asyncio
+                    
+                    try:
+                        loop = asyncio.get_event_loop()
+                    except RuntimeError:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                    
+                    response = loop.run_until_complete(get_ai_prediction(pred_symbol, pred_timeframe))
+                    
+                    st.markdown("---")
+                    st.markdown(response)
+                    st.markdown("---")
+                    st.info("💡 Note: This analysis is powered by Gemini 2.5 Flash using real-time database metrics.")
+                except Exception as e:
+                    st.error(f"Error generating prediction: {e}")
 
 
 # ============================================================
